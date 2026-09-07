@@ -100,7 +100,7 @@ class MockRepository():
     def get_pull(self, number):
         pr = self._prs.get(number)
         if pr is None:
-            raise ValueError("PR does not exist!")
+            raise ValueError(f"PR '{number}' does not exist!")
         return pr
 
 
@@ -113,7 +113,7 @@ class MockGithub():
     def get_repo(self, full_name_or_id, lazy=False):
         repo = self._repos.get(full_name_or_id)
         if repo is None:
-            raise ValueError("Repository does not exist!")
+            raise ValueError(f"Repository '{full_name_or_id}' does not exist!")
         return repo
 
 

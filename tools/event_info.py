@@ -90,10 +90,6 @@ class BaseEventInfo():
         raise NotImplementedError()
 
     @cached_property
-    def pr_title(self):
-        raise NotImplementedError()
-
-    @cached_property
     def pr_merged_status(self):
         raise NotImplementedError()
 

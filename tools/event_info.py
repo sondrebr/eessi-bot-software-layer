@@ -86,6 +86,10 @@ class BaseEventInfo():
         raise NotImplementedError()
 
     @cached_property
+    def pr_title(self):
+        raise NotImplementedError()
+
+    @cached_property
     def pr_merged_status(self):
         raise NotImplementedError()
 
@@ -151,6 +155,15 @@ class GitHubEventInfo(BaseEventInfo):
         elif self.is_pr_comment:
             pr_number = self._request_body["issue"]["number"]
         return pr_number
+
+    @cached_property
+    def pr_title(self):
+        pr_title = ""
+        if self.event_type == "pull_request":
+            pr_title = self._request_body["pull_request"]["title"]
+        elif self.is_pr_comment:
+            pr_title = self._request_body["issue"]["title"]
+        return pr_title
 
     @cached_property
     def pr_merged_status(self):
@@ -294,6 +307,15 @@ class GitLabEventInfo(BaseEventInfo):
         elif self.is_pr_comment:
             pr_iid = self._request_body["merge_request"]["iid"]
         return pr_iid
+
+    @cached_property
+    def pr_title(self):
+        pr_title = ""
+        if self.event_type == "pull_request":
+            pr_title = self._object_attributes["title"]
+        elif self.is_pr_comment:
+            pr_title = self._request_body["merge_request"]["title"]
+        return pr_title
 
     @cached_property
     def pr_merged_status(self):

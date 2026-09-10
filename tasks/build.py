@@ -1091,22 +1091,23 @@ def submit_build_jobs(pr, event_info, action_filter, build_params):
     return job_id_to_comment_map
 
 
-def check_build_permission(pr, event_info):
+def check_build_permission(event_info):
     """
-    Check if GitHub account whom's action resulted in an event is authorized to
+    Check if account whose action resulted in an event is authorized to
     trigger a build job
 
     Args:
-        pr (github.PullRequest.PullRequest): instance representing the pull request
-        event_info (dict): event received by event_handler
+        event_info (EventInfo): event received by event_handler
 
     Returns:
-        (bool): True -> GitHub account is authorized, False -> GitHub account is
-            not authorized
+        (bool): True -> account is authorized, False -> account is not authorized
     """
     fn = sys._getframe().f_code.co_name
 
-    log(f"{fn}(): build for PR {pr.number}")
+    repo_name = event_info.repo_name
+    pr_number = event_info.pr_number
+
+    log(f"{fn}(): build for PR {pr_number}")
 
     cfg = config.read_config()
 
@@ -1116,18 +1117,17 @@ def check_build_permission(pr, event_info):
 
     log(f"{fn}(): build permission '{build_permission}'")
 
-    build_labeler = event_info['raw_request_body']['sender']['login']
+    build_labeler = event_info.event_triggered_by
     if build_labeler not in build_permission.split():
-        log(f"{fn}(): GH account '{build_labeler}' is not authorized to build")
+        log(f"{fn}(): account '{build_labeler}' is not authorized to build")
         no_build_permission_comment = buildenv.get(config.BUILDENV_SETTING_NO_BUILD_PERMISSION_COMMENT)
-        repo_name = event_info["raw_request_body"]["repository"]["full_name"]
         pr_comments.create_comment(repo_name,
-                                   pr.number,
+                                   pr_number,
                                    no_build_permission_comment.format(build_labeler=build_labeler),
                                    ChatLevels.MINIMAL)
         return False
     else:
-        log(f"{fn}(): GH account '{build_labeler}' is authorized to build")
+        log(f"{fn}(): account '{build_labeler}' is authorized to build")
         return True
 
 

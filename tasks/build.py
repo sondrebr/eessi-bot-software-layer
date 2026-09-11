@@ -310,7 +310,7 @@ def get_repo_cfg(cfg):
     return repo_cfg
 
 
-def create_pr_dir(pr, cfg, event_info):
+def create_pr_dir(cfg, event_info):
     """
     Create working directory for job to be submitted. Full path to the working
     directory has the format
@@ -321,10 +321,9 @@ def create_pr_dir(pr, cfg, event_info):
     contains four digits, and month contains two digits
 
     Args:
-        pr (github.PullRequest.PullRequest): instance representing the pull request
         cfg (ConfigParser): ConfigParser instance holding full configuration
             (typically read from 'app.cfg')
-        event_info (dict): event received by event_handler
+        event_info (EventInfo): event received by event_handler
 
     Returns:
         tuple of 3 elements containing
@@ -346,8 +345,8 @@ def create_pr_dir(pr, cfg, event_info):
     jobs_base_dir = build_env_cfg[config.BUILDENV_SETTING_JOBS_BASE_DIR]
 
     year_month = datetime.today().strftime('%Y.%m')
-    pr_id = 'pr_%s' % pr.number
-    event_id = 'event_%s' % event_info['id']
+    pr_id = 'pr_%s' % event_info.pr_number
+    event_id = 'event_%s' % event_info.event_id
     event_dir = os.path.join(jobs_base_dir, year_month, pr_id, event_id)
     # NOTE the first call of os.makedirs cannot be deferred (i.e., to only
     # after it has been determined that any job will be created due to the
@@ -599,7 +598,7 @@ def prepare_jobs(pr, cfg, event_info, action_filter, build_params):
     #      instead of using a run_dir, maybe just create a unique dir for each
     #      job to be submitted? thus we could easily postpone the create_pr_dir
     #      call to just before download_pr
-    year_month, pr_id, run_dir = create_pr_dir(pr, cfg, event_info)
+    year_month, pr_id, run_dir = create_pr_dir(cfg, event_info)
 
     # determine accelerator from action_filter argument
     accelerators = action_filter.get_filter_by_component(tools_filter.FILTER_COMPONENT_ACCEL)

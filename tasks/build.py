@@ -458,13 +458,13 @@ def download_pr(repo_name, branch_name, pr, arch_job_dir, clone_via=None):
     return 'downloading PR succeeded', 'no error while downloading PR', 0, _ERROR_NONE
 
 
-def comment_download_pr(base_repo_name, pr, download_pr_exit_code, download_pr_error, error_stage):
+def comment_download_pr(base_repo_name, pr_number, download_pr_exit_code, download_pr_error, error_stage):
     """
     Handle download_pr() exit code and write helpful comment to PR in case of failure
 
     Args:
         base_repo_name (string): name of the repository (format USER_OR_ORGANISATION/REPOSITORY)
-        pr (github.PullRequest.PullRequest): instance representing the pull request
+        pr_number (int): number of the pull request in the repository
         download_pr_exit_code (int): exit code from download_pr(). 0 if all tasks were successful,
             otherwise it corresponds to the error codes of git clone, git checkout, git apply, or curl.
         download_pr_error (string): none, or the output of stderr from git clone, git checkout, git apply or curl.
@@ -503,7 +503,7 @@ def comment_download_pr(base_repo_name, pr, download_pr_exit_code, download_pr_e
             download_comment = f"```{download_pr_error}```"
 
         download_comment = pr_comments.create_comment(
-            repo_name=base_repo_name, pr_number=pr.number, comment=download_comment, req_chatlevel=ChatLevels.MINIMAL
+            repo_name=base_repo_name, pr_number=pr_number, comment=download_comment, req_chatlevel=ChatLevels.MINIMAL
             )
         if download_comment:
             log(f"{fn}(): created PR issue comment with id {download_comment.id}")
@@ -680,7 +680,7 @@ def prepare_jobs(pr, cfg, event_info, action_filter, build_params):
             download_pr_output, download_pr_error, download_pr_exit_code, error_stage = download_pr(
                 base_repo_name, base_branch_name, pr, job_dir, clone_via=clone_git_repo_via,
                 )
-            comment_download_pr(base_repo_name, pr, download_pr_exit_code, download_pr_error, error_stage)
+            comment_download_pr(base_repo_name, pr.number, download_pr_exit_code, download_pr_error, error_stage)
             # prepare job configuration file 'job.cfg' in directory <job_dir>/cfg
             msg = f"{fn}(): node type = '{node_type_name}' => "
             msg += f"requested cpu_target = '{partition_info['cpu_subdir']}, "
